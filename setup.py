@@ -33,7 +33,6 @@ requires = [
     'zope.interface >= 3.5.1',  # 3.5.0 comment: "allow to bootstrap on jython"
     'chameleon.core >= 1.0b32',  # non-lxml version
     'chameleon.genshi >= 1.0b4', # newest version as of non-xml core release
-    'lxml',
     'WebOb',
     ]
 
