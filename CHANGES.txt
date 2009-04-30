@@ -1,0 +1,7 @@
+repoze.bfg.chameleon_genshi Changelog
+=====================================
+
+0.1 (unreleased)
+----------------
+
+- Initial release.
