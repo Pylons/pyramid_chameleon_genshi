@@ -34,6 +34,7 @@ requires = [
     'chameleon.core >= 1.0b32',  # non-lxml version
     'chameleon.genshi >= 1.0b4', # newest version as of non-xml core release
     'WebOb',
+    'lxml',
     ]
 
 setup(name='repoze.bfg.chameleon_genshi',
@@ -57,7 +58,7 @@ setup(name='repoze.bfg.chameleon_genshi',
       zip_safe=False,
       tests_require = requires,
       install_requires = requires,
-      test_suite="repoze.bfg.chameleon_genshi",
+      test_suite="repoze.bfg.chameleon_genshi.tests",
       entry_points = """\
       """
       )

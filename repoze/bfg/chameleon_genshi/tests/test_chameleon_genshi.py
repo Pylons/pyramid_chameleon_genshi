@@ -45,7 +45,7 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
         minimal = self._getTemplatePath('minimal.genshi')
         instance = self._makeOne(minimal)
         result = instance()
-        self.failUnless(isinstance(result, str))
+        self.failUnless(isinstance(result, unicode))
         self.assertEqual(result,
                          '<div xmlns="http://www.w3.org/1999/xhtml">\n</div>')
 
@@ -54,7 +54,7 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
         minimal = self._getTemplatePath('minimal.genshi')
         instance = self._makeOne(minimal)
         result = instance.implementation()()
-        self.failUnless(isinstance(result, str))
+        self.failUnless(isinstance(result, unicode))
         self.assertEqual(result,
                          '<div xmlns="http://www.w3.org/1999/xhtml">\n</div>')
 
@@ -66,7 +66,7 @@ class RenderTemplateTests(Base, unittest.TestCase):
     def test_it(self):
         minimal = self._getTemplatePath('minimal.genshi')
         result = self._callFUT(minimal)
-        self.failUnless(isinstance(result, str))
+        self.failUnless(isinstance(result, unicode))
         self.assertEqual(result,
                       '<div xmlns="http://www.w3.org/1999/xhtml">\n</div>')
 

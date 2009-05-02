@@ -1,7 +1,7 @@
-repoze.bfg.chameleon_genshi Changelog
-=====================================
+repoze.bfg.chameleon_genshi
+===========================
 
-0.1 (unreleased)
+0.1 (2009-05-02)
 ----------------
 
-- Initial release.
+- Initial release (break code out of BFG core).
