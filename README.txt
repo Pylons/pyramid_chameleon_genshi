@@ -48,10 +48,10 @@ Or::
 
 If you'd rather not use a ``.genshi`` extension for your
 ``chameleon.genshi`` templates, or if you'd rather not use ZCML to do
-registration, you can explicitly register a renderer using a different
-extension.  In the ``run.py`` of your BFG application, in the function
-called at startup, which uses a
-``repoze.bfg.configuration.Configurator`` as ``config``::
+registration, you can explicitly register a renderer using the
+``add_renderer`` method of a "configurator".  To do so, in the
+``run.py`` of your BFG application, in the function called at startup,
+which uses a ``repoze.bfg.configuration.Configurator`` as ``config``::
 
   from repoze.bfg.chameleon_genshi import renderer_factory
   config.add_renderer('.cgenshi', renderer_factory)
