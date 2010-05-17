@@ -16,9 +16,6 @@ __version__ = '0.1'
 
 import os
 
-from ez_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -27,14 +24,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'repoze.bfg',
-    'zope.testing',
-    'zope.deprecation',
-    'zope.component >= 3.6.0', # independent of zope.hookable
-    'zope.interface >= 3.5.1',  # 3.5.0 comment: "allow to bootstrap on jython"
-    'chameleon.core >= 1.0b32',  # non-lxml version
-    'chameleon.genshi >= 1.0b4', # newest version as of non-xml core release
-    'WebOb',
-    'lxml',
+    'Chameleon',
     ]
 
 setup(name='repoze.bfg.chameleon_genshi',
