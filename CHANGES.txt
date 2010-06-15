@@ -1,8 +1,8 @@
 repoze.bfg.chameleon_genshi
 ===========================
 
-Next release
-------------
+0.2 (2010-06-15)
+----------------
 
 - Bring up to speed with BFG 1.3.X.
 
