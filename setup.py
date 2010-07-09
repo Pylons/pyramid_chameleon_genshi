@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 import os
 
@@ -25,7 +25,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 requires = [
     'setuptools',
     'repoze.bfg',
-    'Chameleon',
+    'Chameleon >= 1.2.8', # xincludes_class
     ]
 
 setup(name='repoze.bfg.chameleon_genshi',

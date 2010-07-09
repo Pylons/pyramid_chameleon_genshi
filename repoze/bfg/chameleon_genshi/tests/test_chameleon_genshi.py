@@ -233,6 +233,124 @@ class GetTemplateTests(Base, unittest.TestCase):
         self.failUnless(result is utility.template)
         
         
+class Test_resolve_resource_spec(unittest.TestCase):
+    def _callFUT(self, spec, package_name='__main__'):
+        from repoze.bfg.chameleon_genshi import resolve_resource_spec
+        return resolve_resource_spec(spec, package_name)
+
+    def test_abspath(self):
+        import os
+        here = os.path.dirname(__file__)
+        path = os.path.abspath(here)
+        package_name, filename = self._callFUT(path, 'apackage')
+        self.assertEqual(filename, path)
+        self.assertEqual(package_name, None)
+
+    def test_rel_spec(self):
+        pkg = 'repoze.bfg.chameleon_genshi.tests'
+        path = 'test_resource.py'
+        package_name, filename = self._callFUT(path, pkg)
+        self.assertEqual(package_name, 'repoze.bfg.chameleon_genshi.tests')
+        self.assertEqual(filename, 'test_resource.py')
         
+    def test_abs_spec(self):
+        pkg = 'repoze.bfg.chameleon_genshi.tests'
+        path = 'repoze.bfg.chameleon_genshi.nottests:test_resource.py'
+        package_name, filename = self._callFUT(path, pkg)
+        self.assertEqual(package_name, 'repoze.bfg.chameleon_genshi.nottests')
+        self.assertEqual(filename, 'test_resource.py')
 
+    def test_package_name_is_None(self):
+        pkg = None
+        path = 'test_resource.py'
+        package_name, filename = self._callFUT(path, pkg)
+        self.assertEqual(package_name, None)
+        self.assertEqual(filename, 'test_resource.py')
+        
+class Test_abspath_from_resource_spec(unittest.TestCase):
+    def _callFUT(self, spec, pname='__main__'):
+        from repoze.bfg.chameleon_genshi import abspath_from_resource_spec
+        return abspath_from_resource_spec(spec, pname)
 
+    def test_pname_is_None_before_resolve_resource_spec(self):
+        result = self._callFUT('abc', None)
+        self.assertEqual(result, 'abc')
+
+    def test_pname_is_None_after_resolve_resource_spec(self):
+        result = self._callFUT('/abc', '__main__')
+        self.assertEqual(result, '/abc')
+
+    def test_pkgrelative(self):
+        import os
+        here = os.path.dirname(__file__)
+        path = os.path.abspath(here)
+        result = self._callFUT('abc', 'repoze.bfg.chameleon_genshi.tests')
+        self.assertEqual(result, os.path.join(path, 'abc'))
+
+class TestXIncludes(unittest.TestCase):
+    def _getTargetClass(self):
+        from repoze.bfg.chameleon_genshi import XIncludes
+        return XIncludes
+
+    def _makeOne(self, registry=None, relpath=None, factory=None):
+        if registry is None:
+            registry = {}
+        cls = self._getTargetClass()
+        return cls(registry, relpath, factory)
+
+    def test_get_isabs(self):
+        expected_filename = '/foo/bar'
+        expected_format = 'format'
+        expected_result = 'abc'
+        def factory(filename, format):
+            self.assertEqual(filename, expected_filename)
+            self.assertEqual(format, expected_format)
+            return expected_result
+        xi = self._makeOne(factory=factory)
+        result = xi.get(expected_filename, expected_format)
+        self.assertEqual(result, expected_result)
+        
+    def test_get_isrelpath(self):
+        expected_filename = '/foo/bar'
+        expected_format = 'format'
+        expected_result = 'abc'
+        def factory(filename, format):
+            self.assertEqual(filename, expected_filename)
+            self.assertEqual(format, expected_format)
+            return expected_result
+        xi = self._makeOne(relpath='/foo', factory=factory)
+        result = xi.get('bar', expected_format)
+        self.assertEqual(result, expected_result)
+        
+    def test_get_isresource_spec(self):
+        import os
+        here = os.path.dirname(__file__)
+        expected_filename = os.path.join(here, 'abc')
+        expected_format = 'format'
+        expected_result = 'abc'
+        def factory(filename, format):
+            self.assertEqual(filename, expected_filename)
+            self.assertEqual(format, expected_format)
+            return expected_result
+        xi = self._makeOne(factory = factory)
+        result = xi.get('repoze.bfg.chameleon_genshi.tests:abc',
+                        expected_format)
+        self.assertEqual(result, expected_result)
+        
+    def test_get_already_in_registry(self):
+        expected_filename = '/foo/bar'
+        expected_format = 'format'
+        expected_result = 'template'
+        xi = self._makeOne(registry={'/foo/bar':'template'})
+        result = xi.get(expected_filename, expected_format)
+        self.assertEqual(result, expected_result)
+
+    def test_activate(self):
+        from chameleon.core.template import TemplateFile
+        original_xinclude_cls = TemplateFile.xincludes_class
+        try:
+            cls = self._getTargetClass()
+            cls.activate()
+            self.assertEqual(TemplateFile.xincludes_class, cls)
+        finally:
+            TemplateFile.xinclude_class = original_xinclude_cls

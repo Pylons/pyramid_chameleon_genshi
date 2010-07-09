@@ -62,3 +62,19 @@ configuration, you can do the following::
   @bfg_view(renderer='templates/foo.cgenshi')
   def someview(request):
       ....
+
+Misc
+----
+
+By default, Chameleon's Genshi XIncludes support cannot resolve
+``repoze.bfg`` "resource specifications"
+(e.g. ``my_package:foo/bar.genshi``).  In order to activate an
+XIncludes class that understands repoze.bfg resource specifications,
+call the ``repoze.bfg.chameleon_genshi.XIncludes.activate`` method
+before using any templates (e.g., at process startup time)::
+
+  from repoze.bfg.chameleon_genshi import XIncludes
+  XIncludes.activate()
+
+This will replace the XIncludes helper class for all consumers of
+Chameleon in the process.

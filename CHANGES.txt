@@ -1,6 +1,24 @@
 repoze.bfg.chameleon_genshi
 ===========================
 
+0.3 (2010-07-09)
+----------------
+
+- By default, Chameleon's Genshi XIncludes support cannot resolve
+  ``repoze.bfg`` "resource specifications"
+  (e.g. ``my_package:foo/bar.genshi``).  In order to activate an
+  XIncludes class that understands repoze.bfg resource specifications,
+  call the ``repoze.bfg.chameleon_genshi.XIncludes.activate`` method
+  before using any templates (e.g., at process startup time)::
+
+    from repoze.bfg.chameleon_genshi import XIncludes
+    XIncludes.activate()
+
+  This will replace the XIncludes helper class for all consumers of
+  Chameleon in the process.
+
+- Depend on Chameleon >= 1.2.8 (replaceable XIncludes class).
+
 0.2 (2010-06-15)
 ----------------
 

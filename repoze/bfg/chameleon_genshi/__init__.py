@@ -1,4 +1,6 @@
 import sys
+import os
+import pkg_resources
 
 from webob import Response
 
@@ -100,3 +102,49 @@ def render_template_to_response(path, **kw):
     response_factory = reg.queryUtility(IResponseFactory, default=Response)
     return response_factory(result)
 
+class XIncludes(object):
+    """Dynamic XInclude registry providing a ``get``-method that will
+    resolve a filename to a template instance. Format must be
+    explicitly provided."""
+    
+    def __init__(self, registry, relpath, factory):
+        self.registry = registry
+        self.relpath = relpath
+        self.factory = factory
+
+    def get(self, filename, format):
+        if not os.path.isabs(filename):
+            if ':' in filename:
+                # it's a resource spec
+                filename = abspath_from_resource_spec(filename)
+            else:
+                # it's a relative filename
+                filename = os.path.join(self.relpath, filename)
+        filename = os.path.realpath(filename)
+        template = self.registry.get(filename)
+        if template is not None:
+            return template
+        return self.factory(filename, format=format)
+
+    @classmethod
+    def activate(cls):
+        from chameleon.core.template import TemplateFile
+        TemplateFile.xincludes_class = cls # monkey patch ourselves in
+
+def resolve_resource_spec(spec, pname='__main__'):
+    if os.path.isabs(spec):
+        return None, spec
+    filename = spec
+    if ':' in spec:
+        pname, filename = spec.split(':', 1)
+    elif pname is None:
+        pname, filename = None, spec
+    return pname, filename
+
+def abspath_from_resource_spec(spec, pname='__main__'):
+    if pname is None:
+        return spec
+    pname, filename = resolve_resource_spec(spec, pname)
+    if pname is None:
+        return filename
+    return pkg_resources.resource_filename(pname, filename)
