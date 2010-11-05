@@ -1,0 +1,10 @@
+<configure xmlns="http://pylonshq.com/pyramid">
+
+  <include package="pyramid.includes" file="meta.zcml" />
+
+  <renderer
+     factory="pyramid_chameleon_genshi.renderer_factory"
+     name=".genshi"
+     />
+
+</configure>

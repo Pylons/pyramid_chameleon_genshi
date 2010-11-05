@@ -2,8 +2,6 @@ import sys
 import os
 import pkg_resources
 
-from webob import Response
-
 from zope.interface import implements
 
 try:
@@ -15,17 +13,17 @@ except ImportError: # pragma: no cover
         def __init__(self, *arg, **kw):
             raise ImportError, exc, tb
 
-from repoze.bfg.interfaces import IChameleonTranslate
-from repoze.bfg.interfaces import IResponseFactory
-from repoze.bfg.interfaces import ITemplateRenderer
+from pyramid.interfaces import IChameleonTranslate
+from pyramid.interfaces import ITemplateRenderer
 
-from repoze.bfg.decorator import reify
-from repoze.bfg.renderers import template_renderer_factory
-from repoze.bfg.settings import get_settings
-from repoze.bfg.threadlocal import get_current_registry
+from pyramid.decorator import reify
+from pyramid.path import caller_package
+from pyramid import renderers
+from pyramid.settings import get_settings
+from pyramid.threadlocal import get_current_registry
 
 def renderer_factory(path):
-    return template_renderer_factory(path, GenshiTemplateRenderer)
+    return renderers.template_renderer_factory(path, GenshiTemplateRenderer)
 
 class GenshiTemplateRenderer(object):
     implements(ITemplateRenderer)
@@ -34,6 +32,9 @@ class GenshiTemplateRenderer(object):
 
     @reify # avoid looking up reload_templates before manager pushed
     def template(self):
+        if sys.platform.startswith('java'): # pragma: no cover
+            raise RuntimeError(
+                'Chameleon templates are not compatible with Jython')
         settings = get_settings()
         debug = False
         auto_reload = False
@@ -67,16 +68,27 @@ def get_renderer(path):
     :term:`Chameleon` ZPT template using the template implied by the
     ``path`` argument.  The ``path`` argument may be a
     package-relative path, an absolute path, or a :term:`resource
-    specification`."""
-    return renderer_factory(path)
+    specification`.
+
+    .. warning:: This API is deprecated in :mod:`pyramid_chameleon_genshi`
+       1.0.  Use :func:`pyramid.renderers.get_renderer` instead.
+    """
+    package = caller_package()
+    factory = renderers.RendererHelper(name=path, package=package)
+    return factory.get_renderer()
 
 def get_template(path):
     """ Return the underlying object representing a :term:`Chameleon`
     ZPT template using the template implied by the ``path`` argument.
     The ``path`` argument may be a package-relative path, an absolute
-    path, or a :term:`resource specification`."""
-    renderer = renderer_factory(path)
-    return renderer.implementation()
+    path, or a :term:`resource specification`.
+
+        .. warning:: This API is deprecated in :mod:`pyramid_chameleon_genshi`
+       1.0.  Use :func:`pyramid.renderers.get_renderer` instead.
+    """
+    package = caller_package()
+    factory = renderers.RendererHelper(name=path, package=package)
+    return factory.get_renderer().implementation()
 
 def render_template(path, **kw):
     """ Render a :term:`Chameleon` ZPT template using the template
@@ -84,9 +96,15 @@ def render_template(path, **kw):
     package-relative path, an absolute path, or a :term:`resource
     specification`.  The arguments in ``*kw`` are passed as top-level
     names to the template, and so may be used within the template
-    itself.  Returns a string."""
-    renderer = renderer_factory(path)
-    return renderer(kw, {})
+    itself.  Returns a string.
+
+    .. warning:: This API is deprecated in :mod:`pyramid_chameleon_genshi`
+       1.0.  Use :func:`pyramid.renderers.get_renderer` instead.
+    """
+    package = caller_package()
+    request = kw.pop('request', None)
+    renderer = renderers.RendererHelper(name=path, package=package)
+    return renderer.render(kw, None, request=request)
 
 def render_template_to_response(path, **kw):
     """ Render a :term:`Chameleon` ZPT template using the template
@@ -95,12 +113,15 @@ def render_template_to_response(path, **kw):
     specification`.  The arguments in ``*kw`` are passed as top-level
     names to the template, and so may be used within the template
     itself.  Returns a :term:`Response` object with the body as the
-    template result.."""
-    renderer = renderer_factory(path)
-    result = renderer(kw, {})
-    reg = get_current_registry()
-    response_factory = reg.queryUtility(IResponseFactory, default=Response)
-    return response_factory(result)
+    template result.
+
+    .. warning:: This API is deprecated in :mod:`pyramid_chameleon_genshi`
+       1.0.  Use :func:`pyramid.renderers.get_renderer` instead.
+    """
+    package = caller_package()
+    request = kw.pop('request', None)
+    renderer = renderers.RendererHelper(name=path, package=package)
+    return renderer.render_to_response(kw, None, request=request)
 
 class XIncludes(object):
     """Dynamic XInclude registry providing a ``get``-method that will

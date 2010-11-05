@@ -1,29 +1,9 @@
 import unittest
 
-from repoze.bfg.testing import cleanUp
-
 class Base(object):
     def setUp(self):
-        cleanUp()
-
-    def tearDown(self):
-        cleanUp()
-
-    def _getTemplatePath(self, name):
-        import os
-        here = os.path.abspath(os.path.dirname(__file__))
-        return os.path.join(here, 'fixtures', name)
-
-    def _registerUtility(self, utility, iface, name=''):
-        from repoze.bfg.threadlocal import get_current_registry
-        reg = get_current_registry()
-        reg.registerUtility(utility, iface, name=name)
-        return reg
-        
-class GenshiTemplateRendererTests(Base, unittest.TestCase):
-    def setUp(self):
-        from repoze.bfg.configuration import Configurator
-        from repoze.bfg.registry import Registry
+        from pyramid.configuration import Configurator
+        from pyramid.registry import Registry
         registry = Registry()
         self.config = Configurator(registry=registry)
         self.config.begin()
@@ -31,8 +11,25 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
     def tearDown(self):
         self.config.end()
 
+    def _getTemplatePath(self, name):
+        import os
+        here = os.path.abspath(os.path.dirname(__file__))
+        return os.path.join(here, 'fixtures', name)
+
+    def _registerUtility(self, utility, iface, name=''):
+        from pyramid.threadlocal import get_current_registry
+        reg = get_current_registry()
+        reg.registerUtility(utility, iface, name=name)
+        return reg
+
+    def _registerRenderer(self):
+        from pyramid_chameleon_genshi import renderer_factory
+        self.config.add_renderer('.genshi', renderer_factory)
+        
+
+class GenshiTemplateRendererTests(Base, unittest.TestCase):
     def _getTargetClass(self):
-        from repoze.bfg.chameleon_genshi import GenshiTemplateRenderer
+        from pyramid_chameleon_genshi import GenshiTemplateRenderer
         return GenshiTemplateRenderer
 
     def _makeOne(self, *arg, **kw):
@@ -41,13 +38,13 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
 
     def test_instance_implements_ITemplate(self):
         from zope.interface.verify import verifyObject
-        from repoze.bfg.interfaces import ITemplateRenderer
+        from pyramid.interfaces import ITemplateRenderer
         path = self._getTemplatePath('minimal.genshi')
         verifyObject(ITemplateRenderer, self._makeOne(path))
 
     def test_class_implements_ITemplate(self):
         from zope.interface.verify import verifyClass
-        from repoze.bfg.interfaces import ITemplateRenderer
+        from pyramid.interfaces import ITemplateRenderer
         verifyClass(ITemplateRenderer, self._getTargetClass())
 
     def test_call(self):
@@ -66,7 +63,7 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
         self.assertEqual(template, instance.__dict__['template'])
 
     def test_template_with_ichameleon_translate(self):
-        from repoze.bfg.interfaces import IChameleonTranslate
+        from pyramid.interfaces import IChameleonTranslate
         def ct(): pass
         self.config.registry.registerUtility(ct, IChameleonTranslate)
         minimal = self._getTemplatePath('minimal.genshi')
@@ -92,7 +89,7 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
         self.assertEqual(template.auto_reload, True)
 
     def test_template_with_emptydict(self):
-        from repoze.bfg.interfaces import ISettings
+        from pyramid.interfaces import ISettings
         self.config.registry.registerUtility({}, ISettings)
         minimal = self._getTemplatePath('minimal.genshi')
         instance = self._makeOne(minimal)
@@ -117,10 +114,10 @@ class GenshiTemplateRendererTests(Base, unittest.TestCase):
 
 class RenderTemplateTests(Base, unittest.TestCase):
     def _callFUT(self, name, **kw):
-        from repoze.bfg.chameleon_genshi import render_template
+        from pyramid_chameleon_genshi import render_template
         return render_template(name, **kw)
-
     def test_it(self):
+        self._registerRenderer()
         minimal = self._getTemplatePath('minimal.genshi')
         result = self._callFUT(minimal)
         self.failUnless(isinstance(result, unicode))
@@ -129,10 +126,11 @@ class RenderTemplateTests(Base, unittest.TestCase):
 
 class RenderTemplateToResponseTests(Base, unittest.TestCase):
     def _callFUT(self, name, **kw):
-        from repoze.bfg.chameleon_genshi import render_template_to_response
+        from pyramid_chameleon_genshi import render_template_to_response
         return render_template_to_response(name, **kw)
 
     def test_it(self):
+        self._registerRenderer()
         minimal = self._getTemplatePath('minimal.genshi')
         result = self._callFUT(minimal)
         from webob import Response
@@ -143,10 +141,11 @@ class RenderTemplateToResponseTests(Base, unittest.TestCase):
         self.assertEqual(len(result.headerlist), 2)
 
     def test_iresponsefactory_override(self):
+        self._registerRenderer()
         from webob import Response
         class Response2(Response):
             pass
-        from repoze.bfg.interfaces import IResponseFactory
+        from pyramid.interfaces import IResponseFactory
         self._registerUtility(Response2, IResponseFactory)
         minimal = self._getTemplatePath('minimal.genshi')
         result = self._callFUT(minimal)
@@ -154,88 +153,45 @@ class RenderTemplateToResponseTests(Base, unittest.TestCase):
 
 class GetRendererTests(Base, unittest.TestCase):
     def _callFUT(self, name):
-        from repoze.bfg.chameleon_genshi import get_renderer
+        from pyramid_chameleon_genshi import get_renderer
         return get_renderer(name)
 
-    def test_nonabs_registered(self):
-        from repoze.bfg.threadlocal import get_current_registry
-        from repoze.bfg.chameleon_genshi import GenshiTemplateRenderer
-        from repoze.bfg.interfaces import ITemplateRenderer
-        minimal = self._getTemplatePath('minimal.genshi')
-        utility = GenshiTemplateRenderer(minimal)
-        self._registerUtility(utility, ITemplateRenderer, name=minimal)
-        result = self._callFUT(minimal)
-        self.assertEqual(result, utility)
-        reg = get_current_registry()
-        self.assertEqual(reg.queryUtility(ITemplateRenderer, minimal), utility)
-        
-    def test_nonabs_unregistered(self):
-        from repoze.bfg.threadlocal import get_current_registry
-        from repoze.bfg.chameleon_genshi import GenshiTemplateRenderer
-        from repoze.bfg.interfaces import ITemplateRenderer
-        minimal = self._getTemplatePath('minimal.genshi')
-        reg = get_current_registry()
-        self.assertEqual(reg.queryUtility(ITemplateRenderer, minimal), None)
-        utility = GenshiTemplateRenderer(minimal)
-        self._registerUtility(utility, ITemplateRenderer, name=minimal)
-        result = self._callFUT(minimal)
-        self.assertEqual(result, utility)
-        self.assertEqual(reg.queryUtility(ITemplateRenderer, minimal), utility)
-
-    def test_explicit_registration(self):
-        from repoze.bfg.interfaces import ITemplateRenderer
+    def test_it(self):
+        self._registerRenderer()
+        from pyramid.interfaces import IRendererFactory
         class Dummy:
             template = object()
-        utility = Dummy()
-        self._registerUtility(utility, ITemplateRenderer, name='foo')
+            def implementation(self): pass
+        renderer = Dummy()
+        def rf(spec):
+            return renderer
+        self._registerUtility(rf, IRendererFactory, name='foo')
         result = self._callFUT('foo')
-        self.failUnless(result is utility)
+        self.failUnless(result is renderer)
 
 class GetTemplateTests(Base, unittest.TestCase):
     def _callFUT(self, name):
-        from repoze.bfg.chameleon_genshi import get_template
+        from pyramid_chameleon_genshi import get_template
         return get_template(name)
 
-    def test_nonabs_registered(self):
-        from repoze.bfg.threadlocal import get_current_registry
-        from repoze.bfg.chameleon_genshi import GenshiTemplateRenderer
-        from repoze.bfg.interfaces import ITemplateRenderer
-        minimal = self._getTemplatePath('minimal.genshi')
-        utility = GenshiTemplateRenderer(minimal)
-        self._registerUtility(utility, ITemplateRenderer, name=minimal)
-        result = self._callFUT(minimal)
-        self.assertEqual(result.filename, minimal)
-        reg = get_current_registry()
-        self.assertEqual(reg.queryUtility(ITemplateRenderer, minimal), utility)
-        
-    def test_nonabs_unregistered(self):
-        from repoze.bfg.threadlocal import get_current_registry
-        from repoze.bfg.chameleon_genshi import GenshiTemplateRenderer
-        from repoze.bfg.interfaces import ITemplateRenderer
-        minimal = self._getTemplatePath('minimal.genshi')
-        reg = get_current_registry()
-        self.assertEqual(reg.queryUtility(ITemplateRenderer, minimal), None)
-        utility = GenshiTemplateRenderer(minimal)
-        self._registerUtility(utility, ITemplateRenderer, name=minimal)
-        result = self._callFUT(minimal)
-        self.assertEqual(result.filename, minimal)
-        self.assertEqual(reg.queryUtility(ITemplateRenderer, minimal), utility)
-
-    def test_explicit_registration(self):
-        from repoze.bfg.interfaces import ITemplateRenderer
+    def test_it(self):
+        self._registerRenderer()
+        from pyramid.interfaces import IRendererFactory
         class Dummy:
             template = object()
             def implementation(self):
                 return self.template
-        utility = Dummy()
-        self._registerUtility(utility, ITemplateRenderer, name='foo')
+        renderer = Dummy()
+        def rf(spec):
+            return renderer
+        self._registerUtility(rf, IRendererFactory, name='foo')
         result = self._callFUT('foo')
-        self.failUnless(result is utility.template)
+        self.failUnless(result is renderer.template)
         
         
 class Test_resolve_resource_spec(unittest.TestCase):
     def _callFUT(self, spec, package_name='__main__'):
-        from repoze.bfg.chameleon_genshi import resolve_resource_spec
+        from pyramid_chameleon_genshi import resolve_resource_spec
         return resolve_resource_spec(spec, package_name)
 
     def test_abspath(self):
@@ -247,17 +203,17 @@ class Test_resolve_resource_spec(unittest.TestCase):
         self.assertEqual(package_name, None)
 
     def test_rel_spec(self):
-        pkg = 'repoze.bfg.chameleon_genshi.tests'
+        pkg = 'pyramid_chameleon_genshi.tests'
         path = 'test_resource.py'
         package_name, filename = self._callFUT(path, pkg)
-        self.assertEqual(package_name, 'repoze.bfg.chameleon_genshi.tests')
+        self.assertEqual(package_name, 'pyramid_chameleon_genshi.tests')
         self.assertEqual(filename, 'test_resource.py')
         
     def test_abs_spec(self):
-        pkg = 'repoze.bfg.chameleon_genshi.tests'
-        path = 'repoze.bfg.chameleon_genshi.nottests:test_resource.py'
+        pkg = 'pyramid_chameleon_genshi.tests'
+        path = 'pyramid_chameleon_genshi.nottests:test_resource.py'
         package_name, filename = self._callFUT(path, pkg)
-        self.assertEqual(package_name, 'repoze.bfg.chameleon_genshi.nottests')
+        self.assertEqual(package_name, 'pyramid_chameleon_genshi.nottests')
         self.assertEqual(filename, 'test_resource.py')
 
     def test_package_name_is_None(self):
@@ -269,7 +225,7 @@ class Test_resolve_resource_spec(unittest.TestCase):
         
 class Test_abspath_from_resource_spec(unittest.TestCase):
     def _callFUT(self, spec, pname='__main__'):
-        from repoze.bfg.chameleon_genshi import abspath_from_resource_spec
+        from pyramid_chameleon_genshi import abspath_from_resource_spec
         return abspath_from_resource_spec(spec, pname)
 
     def test_pname_is_None_before_resolve_resource_spec(self):
@@ -284,12 +240,12 @@ class Test_abspath_from_resource_spec(unittest.TestCase):
         import os
         here = os.path.dirname(__file__)
         path = os.path.abspath(here)
-        result = self._callFUT('abc', 'repoze.bfg.chameleon_genshi.tests')
+        result = self._callFUT('abc', 'pyramid_chameleon_genshi.tests')
         self.assertEqual(result, os.path.join(path, 'abc'))
 
 class TestXIncludes(unittest.TestCase):
     def _getTargetClass(self):
-        from repoze.bfg.chameleon_genshi import XIncludes
+        from pyramid_chameleon_genshi import XIncludes
         return XIncludes
 
     def _makeOne(self, registry=None, relpath=None, factory=None):
@@ -333,7 +289,7 @@ class TestXIncludes(unittest.TestCase):
             self.assertEqual(format, expected_format)
             return expected_result
         xi = self._makeOne(factory = factory)
-        result = xi.get('repoze.bfg.chameleon_genshi.tests:abc',
+        result = xi.get('pyramid_chameleon_genshi.tests:abc',
                         expected_format)
         self.assertEqual(result, expected_result)
         

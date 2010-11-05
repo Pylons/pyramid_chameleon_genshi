@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.3'
+__version__ = '0.0'
 
 import os
 
@@ -24,13 +24,13 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'setuptools',
-    'repoze.bfg',
+    'pyramid',
     'Chameleon >= 1.2.8', # xincludes_class
     ]
 
-setup(name='repoze.bfg.chameleon_genshi',
+setup(name='pyramid_chameleon_genshi',
       version=__version__,
-      description=('chameleon.genshi template bindings for the repoze.bfg web '
+      description=('chameleon.genshi template bindings for the Pyramid web '
                    'framework'),
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
@@ -38,18 +38,17 @@ setup(name='repoze.bfg.chameleon_genshi',
         "Programming Language :: Python",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         ],
-      keywords='bfg repoze.bfg genshi chameleon templates',
+      keywords='bfg pyramid pylons genshi chameleon templates',
       author="Agendaless Consulting",
-      author_email="repoze-dev@lists.repoze.org",
-      url="http://bfg.repoze.org",
+      author_email="pylons-devel@googlegroups.com",
+      url="http://docs.pylonshq.com",
       license="BSD-derived (http://www.repoze.org/LICENSE.txt)",
       packages=find_packages(),
       include_package_data=True,
-      namespace_packages=['repoze', 'repoze.bfg'],
       zip_safe=False,
       tests_require = requires,
       install_requires = requires,
-      test_suite="repoze.bfg.chameleon_genshi.tests",
+      test_suite="pyramid_chameleon_genshi.tests",
       entry_points = """\
       """
       )
