@@ -12,7 +12,7 @@
 #
 ##############################################################################
 
-__version__ = '0.0'
+__version__ = '0.1'
 
 import os
 
@@ -39,7 +39,7 @@ setup(name='pyramid_chameleon_genshi',
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         ],
       keywords='bfg pyramid pylons genshi chameleon templates',
-      author="Agendaless Consulting",
+      author="Chris McDonough, Agendaless Consulting",
       author_email="pylons-devel@googlegroups.com",
       url="http://docs.pylonshq.com",
       license="BSD-derived (http://www.repoze.org/LICENSE.txt)",

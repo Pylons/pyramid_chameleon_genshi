@@ -8,4 +8,3 @@ details.
 
 Visit the `Pyramid documentation <http://docs.pylonshq.com/>` for more
 information.
-
