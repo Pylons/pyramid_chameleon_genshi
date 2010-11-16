@@ -1,8 +1,8 @@
 pyramid_chameleon_genshi
 ========================
 
-Next release
-------------
+0.2 (2010-11-16)
+----------------
 
 - Bring up to date with Pyramid 1.0a3+ ``template_renderer_factory`` changes.
 
