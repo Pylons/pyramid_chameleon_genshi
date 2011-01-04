@@ -127,7 +127,7 @@ class XIncludes(object):
             else:
                 # it's a relative filename
                 filename = os.path.join(self.relpath, filename)
-        filename = os.path.realpath(filename)
+        filename = os.path.normpath(filename)
         template = self.registry.get(filename)
         if template is not None:
             return template
