@@ -2,14 +2,14 @@ import unittest
 
 class Base(object):
     def setUp(self):
-        from pyramid.configuration import Configurator
+        from pyramid.testing import setUp
         from pyramid.registry import Registry
         registry = Registry()
-        self.config = Configurator(registry=registry)
-        self.config.begin()
+        self.config = setUp(registry=registry)
 
     def tearDown(self):
-        self.config.end()
+        from pyramid.testing import tearDown
+        tearDown()
 
     def _getTemplatePath(self, name):
         import os
