@@ -1,8 +1,8 @@
 pyramid_chameleon_genshi
 ========================
 
-Next release
-------------
+0.3 (2011-01-08)
+----------------
 
 - Use os.path.normpath instead of os.path.realpath to get a canonical filename
   for XInclude fragments. This prevents many lstat(2) calls for every template
