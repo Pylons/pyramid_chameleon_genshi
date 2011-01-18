@@ -24,7 +24,8 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'setuptools',
-    'pyramid',
+    'pyramid>=1.0a10',
+    'pyramid_zcml',
     'Chameleon >= 1.2.8', # xincludes_class
     ]
 
