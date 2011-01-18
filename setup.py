@@ -12,8 +12,6 @@
 #
 ##############################################################################
 
-__version__ = '0.0'
-
 import os
 
 from setuptools import setup, find_packages
@@ -30,7 +28,7 @@ requires = [
     ]
 
 setup(name='pyramid_chameleon_genshi',
-      version=__version__,
+      version='0.4',
       description=('chameleon.genshi template bindings for the Pyramid web '
                    'framework'),
       long_description=README + '\n\n' +  CHANGES,

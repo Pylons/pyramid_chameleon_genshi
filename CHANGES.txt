@@ -1,8 +1,8 @@
 pyramid_chameleon_genshi
 ========================
 
-Next release
-------------
+0.4 (2011-01-18)
+----------------
 
 - Depend on Pyramid 1.0a10+ (ZCML).
 
