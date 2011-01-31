@@ -19,7 +19,7 @@ An example::
 
   from pyramid.renderers import render_to_response
 
-  return render_template_to_response(
+  return render_to_response(
                 'mypackage:templates/template.genshi', {'a':1})
 
 ``mypackage:templates`` is a Pyramid *asset specification* that ends in
