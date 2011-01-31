@@ -120,6 +120,7 @@ class RenderTemplateTests(Base, unittest.TestCase):
     def _callFUT(self, name, **kw):
         from pyramid_chameleon_genshi import render_template
         return render_template(name, **kw)
+
     def test_it(self):
         self._registerRenderer()
         minimal = self._getTemplatePath('minimal.genshi')
@@ -246,6 +247,25 @@ class Test_abspath_from_resource_spec(unittest.TestCase):
         path = os.path.abspath(here)
         result = self._callFUT('abc', 'pyramid_chameleon_genshi.tests')
         self.assertEqual(result, os.path.join(path, 'abc'))
+
+class Test_includeme(unittest.TestCase):
+    def _callFUT(self, config):
+        from pyramid_chameleon_genshi import includeme
+        includeme(config)
+
+    def test_it(self):
+        from pyramid_chameleon_genshi import renderer_factory
+        class DummyConfigurator(object):
+            def __init__(self):
+                self.renderers = {}
+
+            def add_renderer(self, name, impl):
+                self.renderers[name] = impl
+
+        config = DummyConfigurator()
+        self._callFUT(config)
+        self.assertEqual(config.renderers['.genshi'], renderer_factory)
+        
 
 class TestXIncludes(unittest.TestCase):
     def _getTargetClass(self):

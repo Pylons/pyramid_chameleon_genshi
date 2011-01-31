@@ -1,6 +1,12 @@
 pyramid_chameleon_genshi
 ========================
 
+Next release
+------------
+
+- Fix documentation bugs; add an ``includeme`` function so the package can be
+  included like others.
+
 0.4 (2011-01-18)
 ----------------
 

@@ -155,3 +155,7 @@ def abspath_from_resource_spec(spec, pname='__main__'):
     if pname is None:
         return filename
     return pkg_resources.resource_filename(pname, filename)
+
+def includeme(config):
+    config.add_renderer('.genshi', renderer_factory)
+    
