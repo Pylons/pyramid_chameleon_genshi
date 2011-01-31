@@ -9,9 +9,9 @@ the `Chameleon website <http://chameleon.repoze.org>`_ for
 Usage
 -----
 
-The API for use of ``pyramid_chameleon_genshi`` under :mod:`pyramid` is
-identical to the one used for `chameleon.zpt`` templates as documented in the
-"Templating" chapter of the `Pyramid docs
+The API for use of ``pyramid_chameleon_genshi`` under Pyramid is identical to
+the one used for `chameleon.zpt`` templates as documented in the "Templating"
+chapter of the `Pyramid docs
 <http://docs.pylonshq.com/pyramid/dev/narr/templates.html#chameleon-zpt-templates>`_.
 Only the templating language itself (Genshi vs. ZPT).
 
@@ -29,7 +29,7 @@ Chameleon Genshi templates can be used as a Pyramid "renderer" like this when
 you use ``pyramid_chameleon_genshi``.
 
 The easiest way to allow for this is to use an ``include`` the startup code
-if your application.  In the ``__init__.py`` of your :mod:`pyramid`
+if your application.  In the ``__init__.py`` of your Pyramid
 application, in the ``main`` function called at startup (which uses a
 ``pyramid.configuration.Configurator`` as ``config``) add the following::
 
