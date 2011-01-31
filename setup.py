@@ -28,7 +28,7 @@ requires = [
     ]
 
 setup(name='pyramid_chameleon_genshi',
-      version='0.4',
+      version='0.5',
       description=('chameleon.genshi template bindings for the Pyramid web '
                    'framework'),
       long_description=README + '\n\n' +  CHANGES,
