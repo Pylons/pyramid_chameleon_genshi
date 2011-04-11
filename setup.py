@@ -28,11 +28,11 @@ except:
 requires = [
     'setuptools',
     'pyramid>=1.0a10',
-    'Chameleon >= 1.2.8', # xincludes_class
+    'Chameleon>=1.2.8,<1.999', # xincludes_class
     ]
 
 setup(name='pyramid_chameleon_genshi',
-      version='0.5',
+      version='0.6',
       description=('chameleon.genshi template bindings for the Pyramid web '
                    'framework'),
       long_description=README + '\n\n' +  CHANGES,

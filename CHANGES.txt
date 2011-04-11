@@ -1,12 +1,15 @@
 pyramid_chameleon_genshi
 ========================
 
-Next release
-------------
+0.6 (2001-04-10)
+----------------
 
 - Added ``tox.ini`` for testing.
 
 - Removed dependency on ``pyramid_zcml``.
+
+- Added dependency on Chameleon<1.999 (Genshi support is not present in
+  Chameleon 2).
 
 0.5 (2011-01-31)
 ----------------
