@@ -124,7 +124,16 @@ html_theme = 'pyramid'
 # here, relative to this directory. They are copied after the builtin
 # static files, so a file named "default.css" will overwrite the builtin
 # "default.css".
-html_static_path = ['_static']
+
+# Add and use Pylons theme
+sys.path.append(os.path.abspath('_themes'))
+html_theme_path = ['_themes']
+html_theme = 'pyramid'
+
+html_theme_options = {
+    'github_url': 'https://github.com/Pylons/pyramid_chameleon_genshi'
+}
+
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
